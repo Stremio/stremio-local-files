@@ -20,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/Ivshti/stremio-local-files/issues"
   },
-  "homepage": "https://github.com/Ivshti/stremio-local-files"
+  "homepage": "https://github.com/Ivshti/stremio-local-files",
+  "dependencies": {
+    "async": "^1.5.2",
+    "lodash": "^4.0.0",
+    "name-to-imdb": "^1.0.1",
+    "video-name-parser": "^1.0.1"
+  }
 }
