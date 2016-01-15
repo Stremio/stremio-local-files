@@ -1,0 +1,24 @@
+{
+  "name": "stremio-local-addons",
+  "version": "1.0.0",
+  "description": "Local stremio addon to scan local video files and provide them to Stremio ",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ivshti/stremio-local-files.git"
+  },
+  "keywords": [
+    "stremio",
+    "video",
+    "files"
+  ],
+  "author": "Ivo Georgiev <ivo@linvo.com> (http://ivogeorgiev.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ivshti/stremio-local-files/issues"
+  },
+  "homepage": "https://github.com/Ivshti/stremio-local-files"
+}
