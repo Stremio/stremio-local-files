@@ -17,6 +17,10 @@ var path = require("path");
 
 var DSPath = path.dirname(__dirname+"\\bin\\DS.exe");
 
+function log() {
+    process.env.LOCAL_FILES_LOG && console.log.apply(console, arguments);
+}
+
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
  */
 var firstImportDone = false, hasResults = false; // set to true after the first import has been done
@@ -82,7 +86,7 @@ var sublevel = require("level-sublevel");
 var dataDir = path.join(process.env.APPDATA || process.env.HOME);
 if (process.platform=="darwin") dataDir = path.join(dataDir, "Library/Application Support");
 dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "stremio");
-console.log("Using dataDir: -> "+dataDir);
+log("Using dataDir: -> "+dataDir);
 
 var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: medeadown }));
 var files = db.sublevel("files");
@@ -102,6 +106,8 @@ function exploreFile(p) {
     if (! isFileInteresting(p)) return;
 
     files.get(p, function(err, f) {
+        log("-> "+(f ? "INDEXED" : "NEW") +" "+p);
+
         if (f) return;
 
         if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
@@ -110,7 +116,7 @@ function exploreFile(p) {
         });
         
         fs.stat(p, function(err, s) {
-            indexFile({ path: p, name: path.basename(p), length: s.size })
+            indexFile({ path: p, name: path.basename(p), length: s.size });
         });
     });
 }
@@ -122,6 +128,6 @@ function indexFile(f) {
     // strict means don't lookup google
     nameToImdb({ name: parsed.name, year: parsed.year, type: parsed.type, strict: true }, function(err, imdb_id) {
         parsed.imdb_id = imdb_id;
-        if (imdb_id) console.log(parsed)
+        if (imdb_id) log(parsed)
     });
 };
