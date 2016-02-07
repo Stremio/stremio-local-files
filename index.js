@@ -123,7 +123,7 @@ function exploreFile(p) {
 
 function indexFile(f) {
     var parsed = parseVideoName(f.path, { strict: true, fromInside: true, fileLength: f.length });
-    if (["movie", "series"].indexOf(parsed.type) === -1) return;
+    if (["movie", "series"].indexOf(parsed.type) === -1) return files.put(f.path, { uninteresting: true });
 
     // strict means don't lookup google
     nameToImdb({ name: parsed.name, year: parsed.year, type: parsed.type, strict: true }, function(err, imdb_id) {
