@@ -117,6 +117,7 @@ function exploreFile(p) {
                 tor.files.forEach(function(f, i) {
                     f.path = path.join(p, f.path);
                     f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
+                    f.announce = tor.announce;
                     indexFile(f);
                 });
             }
@@ -128,13 +129,27 @@ function exploreFile(p) {
     });
 }
 
+function getHashes(x) {
+    return (Array.isArray(x.episode) ? x.episode : [x.episode]).map(function(ep) {
+        return [x.imdb_id, x.season, ep ].filter(function(x) { return x }).join(" ")
+    });
+}
+
 function indexFile(f) {
     var parsed = parseVideoName(f.path, { strict: true, fromInside: true, fileLength: f.length });
     if (["movie", "series"].indexOf(parsed.type) === -1) return files.put(f.path, { uninteresting: true });
 
     // strict means don't lookup google
     nameToImdb({ name: parsed.name, year: parsed.year, type: parsed.type, strict: true }, function(err, imdb_id) {
+        if (err) console.error(err);
+        if (! imdb_id) return files.put(f.path, { uninteresting: true });
+
         parsed.imdb_id = imdb_id;
-        if (imdb_id) log(parsed)
+        parsed.fname = f.name; parsed.path = f.path; parsed.length = f.length; 
+        parsed.ih = f.ih; parsed.idx = f.idx; parsed.announce = f.announce; // BitTorrent-specific
+        files.put(f.path, parsed);
+        getHashes(parsed).forEach(function(hash) {
+            console.log(hash)
+        });
     });
 };
