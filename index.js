@@ -88,7 +88,9 @@ var sublevel = require("level-sublevel");
 
 var dataDir = path.join(process.env.APPDATA || process.env.HOME);
 if (process.platform=="darwin") dataDir = path.join(dataDir, "Library/Application Support");
-dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "Stremio");
-console.log(dataDir)
+dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "stremio");
+console.log("Using dataDir: -> "+dataDir);
 
-//var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), medeadown));
+var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: medeadown }));
+var files = db.sublevel("files");
+var meta = db.sublevel("meta");
