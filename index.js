@@ -153,3 +153,37 @@ function indexFile(f) {
         });
     });
 };
+
+
+/* Interface
+ */
+var Stremio = require("stremio-addons");
+
+var manifest = { 
+    "name": "Local",
+    "description": "Watch from local files",
+    "id": "org.stremio.local",
+    "version": "1.0.0",
+    "types": ["movie", "series"],
+    "filter": { "query.imdb_id": { "$exists": true }, "query.type": { "$in":["series","movie"] } }
+};
+
+var methods = { };
+var addon = new Stremio.Server(methods, { stremioget: true }, manifest);
+
+// Listen to 3033 if we're stand-alone
+if (!module.parent) var server = require("http").createServer(function (req, res) {
+    addon.middleware(req, res, function() { res.end() })
+}).on("listening", function()
+{
+    console.log("Local Files Addon listening on "+server.address().port);
+}).listen(process.env.PORT || 3033);
+
+// Export for local usage
+module.exports = addon;
+
+// Get stream
+methods["stream.find"] = function(args, callback) {
+    if (! args.query) return callback();
+    var hash = getHashes(args.query)[0];
+};
