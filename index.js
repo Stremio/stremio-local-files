@@ -80,7 +80,7 @@ function isFileInteresting(f) {
 /* Storage
  */
 var levelup = require("levelup");
-var medeadown = require("medeadown");
+var store = require("memdown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
 var sublevel = require("level-sublevel");
 
 var dataDir = path.join(process.env.APPDATA || process.env.HOME);
@@ -88,7 +88,7 @@ if (process.platform=="darwin") dataDir = path.join(dataDir, "Library/Applicatio
 dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "stremio");
 log("Using dataDir: -> "+dataDir);
 
-var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: medeadown }));
+var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: store }));
 var files = db.sublevel("files");
 var meta = db.sublevel("meta");
 
@@ -148,8 +148,14 @@ function indexFile(f) {
         parsed.fname = f.name; parsed.path = f.path; parsed.length = f.length; 
         parsed.ih = f.ih; parsed.idx = f.idx; parsed.announce = f.announce; // BitTorrent-specific
         files.put(f.path, parsed);
+
         getHashes(parsed).forEach(function(hash) {
-            console.log(hash)
+            log("-> DISCOVERED "+hash);
+            meta.get(hash, function(err, files) {
+                files = files || { };
+                files[f.path] = 1;
+                meta.put(hash, files);
+            });
         });
     });
 };
@@ -186,4 +192,34 @@ module.exports = addon;
 methods["stream.find"] = function(args, callback) {
     if (! args.query) return callback();
     var hash = getHashes(args.query)[0];
+
+    meta.get(hash, function(err, paths) {
+        if (! paths) return callback(null, []);
+
+        async.map(Object.keys(paths), function(id, cb) {
+            files.get(id, function(err, f) {
+                if (err &&  err.type == "NotFoundError") return cb(null, null);
+                else cb(err, f);
+            });
+        }, function(err, all) {
+            if (err) { console.error(err); return callback(new Error("internal")); }
+
+            callback(null, all.map(function(f) {
+                return f.hasOwnProperty("idx") ? {
+                    infoHash: f.ih, mapIdx: f.idx,
+                    sources: [ "dht:"+f.ih ].concat(f.announce.map(function(x) { return "tracker:"+x })),
+                    title: f.fname,
+                    name: "Local Torrent",
+                    tag: f.tag
+                } : { 
+                    url: "file://"+f.path,
+                    title: f.fname,
+                    name: "Local File",
+                    tag: f.tag
+                }
+            }));
+        });
+    });
 };
+
+// TODO: supply meta.find so we can provide a catalogue as well
