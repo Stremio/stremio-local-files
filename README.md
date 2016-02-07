@@ -1,5 +1,5 @@
 # stremio-local-files
-## Stremio add=on that scans local video files
+## Stremio add-on that scans local video files
 
 ### How to set this up?
 

@@ -80,6 +80,15 @@ function isFileInteresting(f) {
     return f.match(MATCH_FILES) || f.match(".torrent$");
 };
 
-/* Storage
+/* Storage / index
  */
-//var store = 
+var levelup = require("levelup");
+var medeadown = require("medeadown");
+var sublevel = require("level-sublevel");
+
+var dataDir = path.join(process.env.APPDATA || process.env.HOME);
+if (process.platform=="darwin") dataDir = path.join(dataDir, "Library/Application Support");
+dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "Stremio");
+console.log(dataDir)
+
+//var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), medeadown));
