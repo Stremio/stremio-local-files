@@ -112,7 +112,14 @@ function exploreFile(p) {
 
         if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
             if (err) console.error(err);
-            if (buf) parseTorrent(buf).files.forEach(indexFile);
+            if (buf) { 
+                var tor = parseTorrent(buf);
+                tor.files.forEach(function(f, i) {
+                    f.path = path.join(p, f.path);
+                    f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
+                    indexFile(f);
+                });
+            }
         });
         
         fs.stat(p, function(err, s) {
