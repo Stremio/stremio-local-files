@@ -23,10 +23,12 @@
   "homepage": "https://github.com/Ivshti/stremio-local-files",
   "dependencies": {
     "async": "^1.5.2",
+    "byline": "^4.2.1",
     "levelup": "^1.3.1",
     "lodash": "^4.0.0",
     "medeadown": "^1.1.8",
     "name-to-imdb": "^1.0.1",
-    "video-name-parser": "^1.0.1"
+    "video-name-parser": "^1.0.1",
+    "walk": "^2.3.9"
   }
 }
