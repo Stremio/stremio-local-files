@@ -101,17 +101,27 @@ function exploreFile(p) {
 
     if (! isFileInteresting(p)) return;
 
-    if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
-    	if (err) console.error(err);
-    	if (buf) parseTorrent(buf).files.forEach(indexFile);
+    files.get(p, function(err, f) {
+        if (f) return;
+
+        if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
+            if (err) console.error(err);
+            if (buf) parseTorrent(buf).files.forEach(indexFile);
+        });
+        
+        fs.stat(p, function(err, s) {
+            indexFile({ path: p, name: path.basename(p), length: s.size })
+        });
     });
-    
-    fs.stat(p, function(err, s) {
-    	indexFile({ path: p, name: path.basename(p), length: s.size })
-    })
-    //console.log(parseVideoName(p, { strict: true, fromInside: true, /* fileLength: TODO */ }));
 }
 
 function indexFile(f) {
-	console.log(f)
+    var parsed = parseVideoName(f.path, { strict: true, fromInside: true, fileLength: f.length });
+    if (["movie", "series"].indexOf(parsed.type) === -1) return;
+
+    // strict means don't lookup google
+    nameToImdb({ name: parsed.name, year: parsed.year, type: parsed.type, strict: true }, function(err, imdb_id) {
+        parsed.imdb_id = imdb_id;
+        if (imdb_id) console.log(parsed)
+    });
 };
