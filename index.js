@@ -31,7 +31,7 @@ async.forever(function(callback)
         if (process.platform.match("darwin")) searchProcess = child.exec("mdfind '(kMDItemFSName=*.avi || kMDItemFSName=*.mp4 || kMDItemFSName=*.mkv || kMDItemFSName=*.torrent) " + (firstImportDone ? "&& kMDItemFSContentChangeDate >= $time.today(-1)'" : "'"))
         if (process.platform.match("win32")) searchProcess = child.spawn(DSPath, [ "/b", "/e", "avi,mp4,mkv,mov,torrent" ].concat(firstImportDone ? ["modified:today"] : []));
         if (searchProcess) {
-            byline.createStream(searchProcess.stdout).on("data", indexFile);
+            byline.createStream(searchProcess.stdout).on("data", exploreFile);
             searchProcess.on("exit", function(code) { firstImportDone = true; setTimeout(callback, VIDEO_INDEXING_INTERVAL) });                
             searchProcess.on("error", function(e) { console.error(e) });
         }
@@ -55,7 +55,7 @@ async.forever(function(callback)
             walker.on("file", function(root, file, next) {
                 if (timedOut) return; // don't call next, stop walking; we may have the walker in memory, but no way to clean it up for now
                 //if (file && isFileInteresting(file.name)) console.log("fallback "+file.name);
-                if (file && isFileInteresting(file.name)) indexFile(path.join(root,file.name));
+                if (file && isFileInteresting(file.name)) exploreFile(path.join(root,file.name));
                 
                 // TODO: CONSIDER: throttle calling of next; e.g. 100 calls per second?
                 next();
@@ -67,20 +67,13 @@ async.forever(function(callback)
     };
 }, function(err) { console.error(err) });
 
-function indexFile(p) {
-    hasResults = true;
-    var p = p.toString();
-    
-    // TODO: special case if it's .torrent
-    if (isFileInteresting(p)) console.log(p);
-};
 
 function isFileInteresting(f) {
     if (f.match("stremio-cache")) return false;
     return f.match(MATCH_FILES) || f.match(".torrent$");
 };
 
-/* Storage / index
+/* Storage
  */
 var levelup = require("levelup");
 var medeadown = require("medeadown");
@@ -94,3 +87,31 @@ console.log("Using dataDir: -> "+dataDir);
 var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: medeadown }));
 var files = db.sublevel("files");
 var meta = db.sublevel("meta");
+
+
+/* Index
+ */
+var nameToImdb = require("name-to-imdb");
+var parseVideoName = require("video-name-parser");
+var parseTorrent = require("parse-torrent");
+
+function exploreFile(p) {
+    hasResults = true;
+    var p = p.toString();
+
+    if (! isFileInteresting(p)) return;
+
+    if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
+    	if (err) console.error(err);
+    	if (buf) parseTorrent(buf).files.forEach(indexFile);
+    });
+    
+    fs.stat(p, function(err, s) {
+    	indexFile({ path: p, name: path.basename(p), length: s.size })
+    })
+    //console.log(parseVideoName(p, { strict: true, fromInside: true, /* fileLength: TODO */ }));
+}
+
+function indexFile(f) {
+	console.log(f)
+};
