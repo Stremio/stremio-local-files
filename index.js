@@ -104,7 +104,7 @@ function exploreFile(file) {
     var p = typeof(file) == "string" ? file : file.path;
 
     if (! isFileInteresting(p)) return;
-    if (! /^[\000-\177]*$/.test(p)) return log("WARNING temporary disabled non-utf8 paths",p);
+    //if (! /^[\000-\177]*$/.test(p)) return log("WARNING temporary disabled non-utf8 paths",p);
 
     if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
         if (err) console.error(err);
