@@ -99,32 +99,32 @@ var nameToImdb = require("name-to-imdb");
 var parseVideoName = require("video-name-parser");
 var parseTorrent = require("parse-torrent");
 
-function exploreFile(p) {
+function exploreFile(file) {
     hasResults = true;
-    var p = p.toString();
+    var p = typeof(file) == "string" ? file : file.path;
 
     if (! isFileInteresting(p)) return;
     if (! /^[\000-\177]*$/.test(p)) return log("WARNING temporary disabled non-utf8 paths",p);
 
+    if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
+        if (err) console.error(err);
+        if (buf) { 
+            var tor = parseTorrent(buf);
+            tor.files.forEach(function(f, i) {
+                f.path = path.join(p, f.path);
+                f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
+                f.announce = tor.announce;
+                exploreFile(f);
+            });
+        }
+    });
+    
     files.get(p, function(err, f) {
         log("-> "+(f ? "INDEXED" : "NEW") +" "+p);
 
         if (f) return;
 
-        if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
-            if (err) console.error(err);
-            if (buf) { 
-                var tor = parseTorrent(buf);
-                tor.files.forEach(function(f, i) {
-                    f.path = path.join(p, f.path);
-                    f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
-                    f.announce = tor.announce;
-                    indexFile(f);
-                });
-            }
-        });
-        
-        fs.stat(p, function(err, s) {
+        if (file.path) indexFile(file); else fs.stat(p, function(err, s) {
             indexFile({ path: p, name: path.basename(p), length: s.size });
         });
     });
