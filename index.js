@@ -80,7 +80,7 @@ function isFileInteresting(f) {
 /* Storage
  */
 var levelup = require("levelup");
-var store = require("memdown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
+var store = require("medeadown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
 var sublevel = require("level-sublevel");
 
 var dataDir = path.join(process.env.APPDATA || process.env.HOME);
@@ -104,6 +104,7 @@ function exploreFile(p) {
     var p = p.toString();
 
     if (! isFileInteresting(p)) return;
+    if (! /^[\000-\177]*$/.test(p)) return log("WARNING temporary disabled non-utf8 paths",p);
 
     files.get(p, function(err, f) {
         log("-> "+(f ? "INDEXED" : "NEW") +" "+p);
