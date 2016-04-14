@@ -80,7 +80,7 @@ function isFileInteresting(f) {
 /* Storage
  */
 var levelup = require("levelup");
-var store = require("medeadown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
+var store = require("memdown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
 var sublevel = require("level-sublevel");
 
 var dataDir = path.join(process.env.APPDATA || process.env.HOME);
