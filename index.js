@@ -120,7 +120,7 @@ function exploreFile(file) {
     });
     
     files.get(p, function(err, f) {
-        log("-> "+(f ? "INDEXED" : "NEW") +" "+p);
+        log("-> "+(f ? "HAS INDEXED" : "NEW") +" "+p);
 
         if (f) return;
 
@@ -223,4 +223,9 @@ methods["stream.find"] = function(args, callback) {
     });
 };
 
-// TODO: supply meta.find so we can provide a catalogue as well
+// Catalogue / listing
+methods["meta.find"] = function(args, callback) {
+    meta.createReadStream().on("data", function(m) {
+        console.log(m)
+    })
+};
