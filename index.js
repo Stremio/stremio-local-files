@@ -109,7 +109,10 @@ function exploreFile(file) {
     if (p.match(/.torrent$/)) return fs.readFile(p, function(err, buf) {
         if (err) console.error(err);
         if (buf) { 
-            var tor = parseTorrent(buf);
+            try { 
+                var tor = parseTorrent(buf);
+            } catch(e) { return console.error(e, p) }
+            
             tor.files.forEach(function(f, i) {
                 f.path = path.join(p, f.path);
                 f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
