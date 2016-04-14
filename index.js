@@ -227,8 +227,18 @@ methods["stream.find"] = function(args, callback) {
 };
 
 // Catalogue / listing
+var addons = new Stremio.Client();
+addons.add("http://cinemeta.strem.io/stremioget");
 methods["meta.find"] = function(args, callback) {
+    var ids = { };
     meta.createReadStream().on("data", function(m) {
-        console.log(m)
+        var k = m.key.split(" ")[0];
+        ids[k] = (ids[k] || 0) + 1;
+    }).on("end", function() {
+        if (args && args.query) args.query.imdb_id = args.query.imdb_id || { $in: Object.keys(ids) };
+        addons.meta.find(args, callback);
     })
 };
+
+//manifest.sorts = [{prop: 'popularities.netflix', name: 'Netflix', types:['movie', 'series']}];
+//manifest.filter['sort.popularities.netflix'] = { $exists: true };
