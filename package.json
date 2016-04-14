@@ -30,6 +30,7 @@
     "lodash": "^4.0.0",
     "memdown": "*",
     "name-to-imdb": "^1.0.2",
+    "parse-torrent": "^5.7.3",
     "stremio-addons": "^1.22.2",
     "video-name-parser": "^1.0.1",
     "walk": "^2.3.9"
