@@ -182,7 +182,7 @@ var methods = { };
 var addon = new Stremio.Server(methods, { stremioget: true }, manifest);
 
 // Listen to 3033 if we're stand-alone
-if (!module.parent) var server = require("http").createServer(function (req, res) {
+if (require.main==="stremio-local-files") var server = require("http").createServer(function (req, res) {
     addon.middleware(req, res, function() { res.end() })
 }).on("listening", function()
 {
