@@ -1,6 +1,6 @@
 {
   "name": "stremio-local-files",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Local stremio addon to scan local video files and provide them to Stremio ",
   "main": "index.js",
   "scripts": {
