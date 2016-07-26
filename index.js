@@ -24,7 +24,11 @@ function log() {
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
  */
 var firstImportDone = false, hasResults = false; // set to true after the first import has been done
-async.forever(function(callback)
+setTimeout(function() {
+    async.forever(scanSystem, function(err) { console.error(err) });
+}, 5*1000); // don't put system load immediately after initialization
+
+function scanSystem(callback)
 {
     /* Documentation for the querying on Windows: http://msdn.microsoft.com/en-us/library/aa965711(v=vs.85).aspx
      * and on OS X: http://osxnotes.net/spotlight.html
@@ -69,8 +73,7 @@ async.forever(function(callback)
             walker.on("error", function() { });
         });
     };
-}, function(err) { console.error(err) });
-
+}
 
 function isFileInteresting(f) {
     if (f.match("stremio-cache")) return false;
