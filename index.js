@@ -15,10 +15,10 @@ var child = require("child_process");
 var byline = require("byline");
 var path = require("path");
 
-var DSPath = path.dirname(__dirname+"\\bin\\DS.exe");
+var DSPath = path.join(__dirname, "bin", "DS.exe");
 
 function log() {
-    process.env.LOCAL_FILES_LOG && console.log.apply(console, arguments);
+    (process.env.LOCAL_FILES_LOG || require.main==="stremio-local-files") && console.log.apply(console, arguments);
 }
 
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
@@ -242,6 +242,3 @@ methods["meta.find"] = function(args, callback) {
         addons.meta.find(args, callback);
     })
 };
-
-//manifest.sorts = [{prop: 'popularities.netflix', name: 'Netflix', types:['movie', 'series']}];
-//manifest.filter['sort.popularities.netflix'] = { $exists: true };

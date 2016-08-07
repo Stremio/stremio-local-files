@@ -1,11 +1,11 @@
 {
   "name": "stremio-local-files",
-  "version": "1.4.3",
+  "version": "1.5.2",
   "description": "Local stremio addon to scan local video files and provide them to Stremio ",
   "main": "index.js",
   "scripts": {
     "test": "tape test/*",
-    "start": "LOCAL_FILES_LOG=1 node index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
