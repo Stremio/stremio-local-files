@@ -231,7 +231,7 @@ methods["stream.find"] = function(args, callback) {
 
 // Catalogue / listing
 var addons = new Stremio.Client();
-addons.add("http://cinemeta.strem.io/stremioget");
+addons.add("http://cinemeta.strem.io/stremioget/stremio/v1");
 methods["meta.find"] = function(args, callback) {
     var ids = { };
     meta.createReadStream().on("data", function(m) {
