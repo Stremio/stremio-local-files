@@ -176,7 +176,7 @@ var manifest = {
     "name": "Local",
     "description": "Watch from local files",
     "id": "org.stremio.local",
-    "version": "1.0.0",
+    "version": require("./package").version,
     "types": ["movie", "series"],
     "filter": { "query.imdb_id": { "$exists": true }, "query.type": { "$in":["series","movie"] } }
 };
