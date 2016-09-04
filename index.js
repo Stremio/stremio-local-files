@@ -177,7 +177,11 @@ var manifest = {
     "description": "Watch from local files",
     "id": "org.stremio.local",
     "version": require("./package").version,
+
     "types": ["movie", "series"],
+    "idProperty": "imdb_id",
+    
+    // OBSOLETE; used instead of types/idProperty before stremio 4.0
     "filter": { "query.imdb_id": { "$exists": true }, "query.type": { "$in":["series","movie"] } }
 };
 
