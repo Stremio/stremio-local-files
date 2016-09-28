@@ -76,6 +76,10 @@ function scanSystem(callback)
 }
 
 function isFileInteresting(f) {
+    if (typeof(f) === "string") { 
+        console.log("isFileInteresting called with wrong arg: ", f);
+        return false;
+    }
     if (f.match("stremio-cache")) return false;
     return f.match(MATCH_FILES) || f.match(".torrent$");
 };
