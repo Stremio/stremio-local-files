@@ -76,7 +76,7 @@ function scanSystem(callback)
 }
 
 function isFileInteresting(f) {
-    if (typeof(f) === "string") { 
+    if (typeof(f) !== "string") { 
         console.log("isFileInteresting called with wrong arg: ", f);
         return false;
     }
