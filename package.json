@@ -29,7 +29,7 @@
     "levelup": "~0.19.0",
     "lodash": "^4.0.0",
     "memdown": "*",
-    "name-to-imdb": "1.x.x",
+    "name-to-imdb": "^1.4.1",
     "parse-torrent": "^5.8.1",
     "stremio-addons": "^2.5.1",
     "video-name-parser": "^1.0.1",
