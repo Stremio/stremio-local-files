@@ -18,7 +18,7 @@ var path = require("path");
 var DSPath = path.join(__dirname, "bin", "DS.exe");
 
 function log() {
-    (process.env.LOCAL_FILES_LOG || require.main==="stremio-local-files") && console.log.apply(console, arguments);
+    (process.env.LOCAL_FILES_LOG || require.main===module) && console.log.apply(console, arguments);
 }
 
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
@@ -193,7 +193,7 @@ var methods = { };
 var addon = new Stremio.Server(methods, { stremioget: true }, manifest);
 
 // Listen to 3033 if we're stand-alone
-if (require.main==="stremio-local-files") var server = require("http").createServer(function (req, res) {
+if (require.main===module) var server = require("http").createServer(function (req, res) {
     addon.middleware(req, res, function() { res.end() })
 }).on("listening", function()
 {
