@@ -104,7 +104,7 @@ var meta = db.sublevel("meta");
  */
 var nameToImdb = require("name-to-imdb");
 var parseVideoName = require("video-name-parser");
-var parseTorrent = require("parse-torrent");
+var parseTorrent = require("parse-torrent-file");
 
 function exploreFile(file) {
     hasResults = true;
