@@ -21,6 +21,14 @@ function log() {
     (process.env.LOCAL_FILES_LOG || require.main===module) && console.log.apply(console, arguments);
 }
 
+/* Storage system
+ */
+var storage = {
+    _data: { },
+    put: function(id, data, cb) { storage._data[id] = data; if (cb) cb() },
+    get: function(id, cb) { cb(null, storage._data[id]) },
+}
+
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
  */
 var firstImportDone = false, hasResults = false; // set to true after the first import has been done
@@ -63,7 +71,7 @@ function scanSystem(callback)
             walker.on("file", function(root, file, next) {
                 if (timedOut) return; // don't call next, stop walking; we may have the walker in memory, but no way to clean it up for now
                 //if (file && isFileInteresting(file.name)) console.log("fallback "+file.name);
-                if (file && isFileInteresting(file.name)) exploreFile(path.join(root,file.name));
+                if (file && isFileInteresting(file.name)) exploreFile(path.join(root, file.name));
                 
                 // TODO: CONSIDER: throttle calling of next; e.g. 100 calls per second?
                 next();
@@ -86,19 +94,6 @@ function isFileInteresting(f) {
 
 /* Storage
  */
-var levelup = require("levelup");
-var store = require("memdown"); // TODO pick from https://github.com/Level/levelup/wiki/Modules#storage-back-ends
-var sublevel = require("level-sublevel");
-
-var dataDir = path.join(process.env.APPDATA || process.env.HOME);
-if (process.platform=="darwin") dataDir = path.join(dataDir, "Library/Application Support");
-dataDir = path.join(dataDir, process.platform=="linux" ? ".stremio" : "stremio");
-log("Using dataDir: -> "+dataDir);
-
-var db = sublevel(levelup(path.join(dataDir, "stremio-local-files"), { valueEncoding: "json", db: store }));
-var files = db.sublevel("files");
-var meta = db.sublevel("meta");
-
 
 /* Index
  */
@@ -129,7 +124,7 @@ function exploreFile(file) {
         }
     });
     
-    files.get(p, function(err, f) {
+    storage.get("files:"+p, function(err, f) {
         log("-> "+(f ? "HAS INDEXED" : "NEW") +" "+p);
 
         if (f) return;
@@ -148,24 +143,24 @@ function getHashes(x) {
 
 function indexFile(f) {
     var parsed = parseVideoName(f.path, { strict: true, fromInside: true, fileLength: f.length });
-    if (["movie", "series"].indexOf(parsed.type) === -1) return files.put(f.path, { uninteresting: true });
+    if (["movie", "series"].indexOf(parsed.type) === -1) return storage.put("file:"+f.path, { uninteresting: true });
 
     // strict means don't lookup google
     nameToImdb({ name: parsed.name, year: parsed.year, type: parsed.type, strict: true }, function(err, imdb_id) {
         if (err) console.error(err);
-        if (! imdb_id) return files.put(f.path, { uninteresting: true });
+        if (! imdb_id) return storage.put("files:"+f.path, { uninteresting: true });
 
         parsed.imdb_id = imdb_id;
         parsed.fname = f.name; parsed.path = f.path; parsed.length = f.length; 
         parsed.ih = f.ih; parsed.idx = f.idx; parsed.announce = f.announce; // BitTorrent-specific
-        files.put(f.path, parsed);
+        storage.put("files:"+f.path, parsed);
 
         getHashes(parsed).forEach(function(hash) {
             log("-> DISCOVERED "+hash);
-            meta.get(hash, function(err, files) {
+            storage.get("meta:"+hash, function(err, files) {
                 files = files || { };
                 files[f.path] = 1;
-                meta.put(hash, files);
+                storage.put("meta:"+hash, files);
             });
         });
     });
@@ -208,11 +203,11 @@ methods["stream.find"] = function(args, callback) {
     if (! args.query) return callback();
     var hash = getHashes(args.query)[0];
 
-    meta.get(hash, function(err, paths) {
+    storage.get("meta:"+hash, function(err, paths) {
         if (! paths) return callback(null, []);
 
         async.map(Object.keys(paths), function(id, cb) {
-            files.get(id, function(err, f) {
+            storage.get("files:"+id, function(err, f) {
                 if (err &&  err.type == "NotFoundError") return cb(null, null);
                 else cb(err, f);
             });
