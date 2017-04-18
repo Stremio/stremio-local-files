@@ -47,7 +47,7 @@ function scanSystem(callback)
         if (process.platform.match("darwin")) searchProcess = child.exec("mdfind '(kMDItemFSName=*.avi || kMDItemFSName=*.mp4 || kMDItemFSName=*.mkv || kMDItemFSName=*.torrent) " + (firstImportDone ? "&& kMDItemFSContentChangeDate >= $time.today(-1)'" : "'"))
         if (process.platform.match("win32")) searchProcess = child.spawn(DSPath, [ "/b", "/e", "avi,mp4,mkv,mov,torrent" ].concat(firstImportDone ? ["modified:today"] : []));
         if (searchProcess) {
-            byline.createStream(searchProcess.stdout).on("data", exploreFile);
+            byline.createStream(searchProcess.stdout).on("data", function(line) { exploreFile(line.toString()) });
             searchProcess.on("exit", function(code) { firstImportDone = true; setTimeout(callback, VIDEO_INDEXING_INTERVAL) });                
             searchProcess.on("error", function(e) { console.error(e) });
         }
