@@ -245,3 +245,8 @@ methods["meta.find"] = function(args, callback) {
         addons.meta.find(args, callback);
     })
 };
+
+// override storage
+module.exports.setStorage = function(st) {
+    storage = st
+}
