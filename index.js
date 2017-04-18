@@ -27,6 +27,10 @@ var storage = {
     _data: { },
     put: function(id, data, cb) { storage._data[id] = data; if (cb) cb() },
     get: function(id, cb) { cb(null, storage._data[id]) },
+    forAll: function(forKey, onEnd) {
+        Object.keys(storage._data).forEach(function(k) { forKey({ key: k, value: storage._data[k] }) })
+        onEnd()
+    }
 }
 
 /* Automatically import files into the database using the Windows Search SDK / OS X Spotlight
@@ -237,10 +241,13 @@ var addons = new Stremio.Client();
 addons.add("http://cinemeta.strem.io/stremioget/stremio/v1");
 methods["meta.find"] = function(args, callback) {
     var ids = { };
-    meta.createReadStream().on("data", function(m) {
-        var k = m.key.split(" ")[0];
-        ids[k] = (ids[k] || 0) + 1;
-    }).on("end", function() {
+    storage.forAll(function(m) {
+        // meta: - 5 chars
+        if (m.key.indexOf("meta:") === 0) {
+            var k = m.key.slice(5).split(" ")[0];
+            if (k.indexOf("tt") === 0) ids[k] = (ids[k] || 0) + 1;
+        }
+    }, function() {
         if (args && args.query) args.query.imdb_id = args.query.imdb_id || { $in: Object.keys(ids) };
         addons.meta.find(args, callback);
     })
