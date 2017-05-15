@@ -134,7 +134,7 @@ function exploreFile(file) {
         if (f) return;
 
         if (file.path) indexFile(file); else fs.stat(p, function(err, s) {
-            indexFile({ path: p, name: path.basename(p), length: s.size });
+            if (s) indexFile({ path: p, name: path.basename(p), length: s.size });
         });
     });
 }
