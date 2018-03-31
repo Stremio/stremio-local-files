@@ -121,8 +121,7 @@ function exploreFile(file) {
             
             tor.files.forEach(function(f, i) {
                 f.path = path.join(p, f.path);
-                f.ih = tor.infoHash; f.idx = i; // BitTorrent-specific
-                f.announce = tor.announce;
+                f.torrentInfo = { ih: tor.infoHash, idx: i, announce: tor.announce };
                 exploreFile(f);
             });
         }
@@ -156,7 +155,7 @@ function indexFile(f) {
 
         parsed.imdb_id = imdb_id;
         parsed.fname = f.name; parsed.path = f.path; parsed.length = f.length; 
-        parsed.ih = f.ih; parsed.idx = f.idx; parsed.announce = f.announce; // BitTorrent-specific
+        parsed.torrentInfo = f.torrentInfo;
         storage.put("files:"+f.path, parsed);
 
         getHashes(parsed).forEach(function(hash) {
@@ -219,9 +218,9 @@ methods["stream.find"] = function(args, callback) {
             if (err) { console.error(err); return callback(new Error("internal")); }
 
             callback(null, all.map(function(f) {
-                return f.hasOwnProperty("idx") ? {
-                    infoHash: f.ih, mapIdx: f.idx,
-                    sources: [ "dht:"+f.ih ].concat(f.announce.map(function(x) { return "tracker:"+x })),
+                return f.torrentInfo ? {
+                    infoHash: f.torrentInfo.ih, mapIdx: f.torrentInfo.idx,
+                    sources: [ "dht:"+f.torrentInfo.ih ].concat(f.torrentInfo.announce.map(function(x) { return "tracker:"+x })),
                     title: f.fname,
                     name: "Local Torrent",
                     tag: f.tag
