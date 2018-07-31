@@ -219,7 +219,7 @@ methods["stream.find"] = function(args, callback) {
 
             callback(null, all.map(function(f) {
                 return f.torrentInfo ? {
-                    infoHash: f.torrentInfo.ih, mapIdx: f.torrentInfo.idx,
+                    infoHash: f.torrentInfo.ih, fileIdx: f.torrentInfo.idx,
                     sources: [ "dht:"+f.torrentInfo.ih ].concat(f.torrentInfo.announce.map(function(x) { return "tracker:"+x })),
                     title: f.fname,
                     name: "Local Torrent",
