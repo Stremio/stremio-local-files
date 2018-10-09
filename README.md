@@ -1,4 +1,7 @@
 # stremio-local-files
+
+## [OBSOLETE] - replaced by https://github.com/stremio/stremio-local-addon
+
 ## Stremio add-on that scans local video files
 
 ### How to set this up?
